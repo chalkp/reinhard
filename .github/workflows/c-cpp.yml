@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: install
+      run: make install
     - name: setup
       run: make setup
     - name: make
