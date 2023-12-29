@@ -37,7 +37,7 @@ clean:
 	mkdir build/obj build/shaders
 
 setup:
-	mkdir build build/obj
+	mkdir build build/obj build/shaders
 
 lazy:
 	make clean
