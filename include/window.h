@@ -1,28 +1,15 @@
 #pragma once
 
-#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <stdbool.h>
 
-#include <string>
+typedef struct Window {
+  int width;
+  int height;
+  const char *windowName;
+  GLFWwindow *window;
+} Window;
 
-namespace reinhard {
-
-  class Window {
-  public:
-    Window(int w, int h, std::string name);
-    ~Window();
-    
-    Window(const Window &) = delete;
-    Window &operator = (const Window w) = delete;
-
-    bool shouldClose();
-
-  private:
-    void initWindow();
-    
-    int width;
-    int height;
-    std::string windowName;
-    GLFWwindow *window;
-  };
-}
+Window *createWindow(int w, int h, const char *name);
+void destroyWindow(Window *w);
+bool shouldClose(Window *w);
