@@ -14,9 +14,27 @@ $(TARGET): $(OBJ)
 build/obj/%.o: src/%.c
 	gcc -c -o $@ $< $(INCLUDE) $(LIBS) $(CFLAGS)
 
+
+# compile shaders
+
+VERTS = $(wildcard shaders/*.vert)
+FRAGS = $(wildcard shaders/*.frag)
+SHADER_TARGET = $(patsubst shaders/%.vert, build/shaders/%.vert.spv, $(VERTS)) $(patsubst shaders/%.frag, build/shaders/%.frag.spv, $(FRAGS))
+
+compile_shaders: $(SHADER_TARGET)
+
+build/shaders/%.vert.spv: shaders/%.vert
+	glslc $? -o $@
+
+build/shaders/%.frag.spv: shaders/%.frag
+	glslc $? -o $@
+
+
+# chalk is a lazy wittwle guvy uwu
+
 clean:
 	rm -r build/*
-	mkdir build/obj
+	mkdir build/obj build/shaders
 
 setup:
 	mkdir build build/obj
@@ -24,6 +42,7 @@ setup:
 lazy:
 	make clean
 	make
+	make compile_shaders
 
 run:
 	$(TARGET)
