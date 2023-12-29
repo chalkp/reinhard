@@ -2,7 +2,7 @@ TARGET = build/reinhard
 SRC = $(wildcard src/*.c)
 OBJ = $(patsubst src/%.c, build/obj/%.o, $(SRC))
 
-CFLAGS = -std=c17 -O3
+CFLAGS = -std=c17 -O2 -g -Wall -Wextra -Wpedantic -Werror
 INCLUDE = -Iinclude
 LIBS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 

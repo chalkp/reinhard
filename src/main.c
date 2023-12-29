@@ -6,7 +6,7 @@ void setup();
 void run();
 void finalize();
 
-int main(int argc, char *argv[]) {
+int main() {
   setup();
   run();
   finalize();
