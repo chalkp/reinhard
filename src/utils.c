@@ -14,7 +14,7 @@ char *readFile(const char *path) {
   rewind(file);
 
   char *buffer = (char*)malloc(sizeof(char)*size);
-  (void)fread(buffer, 1, size, file);
+  fread(buffer, 1, size, file);
   fclose(file);
 
   return buffer;
