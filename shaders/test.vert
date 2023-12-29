@@ -1,4 +1,4 @@
-#version 450 core
+#version 450
 
 vec2 positions[4] = vec2[] (
   vec2(1.0, -1.0),

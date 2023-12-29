@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char *readFile(const char *path) {
-  FILE *file = fopen(path, "rb");
+CharVector readFile(const char *path) {
+  FILE *file = fopen(path, "rb+");
   if(file == NULL) {
     fprintf(stderr, "failed to open file: %s\n", path);
     exit(1);
@@ -13,13 +13,25 @@ char *readFile(const char *path) {
   long size = ftell(file);
   rewind(file);
 
-  char *buffer = (char*)malloc(sizeof(char)*size);
+  char *buffer = (char*)calloc(size, sizeof(char));
   long readed = fread(buffer, sizeof(char), size, file);
   if(readed != size) {
-    fprintf(stderr, "failed to read file: %s\nsize readed: %ld", path, readed);
+    fprintf(stderr, "failed to read file: %s\nsize readed: %ld\n", path, readed);
     exit(1);
   }
   fclose(file);
 
-  return buffer;
+  CharVector ret = { buffer, size };
+  return ret;
+}
+
+void writeFile(const char *path, const CharVector *cv) {
+  FILE *file = fopen(path, "wb");
+  long written = fwrite(cv->data, sizeof(char), cv->size, file);
+
+  if(written != cv->size) {
+    fprintf(stderr, "failed to write file: %s\nsize written: %ld\n", path, written);
+    exit(1);
+  }
+  fclose(file);
 }

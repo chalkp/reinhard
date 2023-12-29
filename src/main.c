@@ -1,6 +1,7 @@
-#include "window.h"
+#include "reinhard.h"
+#include <stdio.h>
 
-Window *window;
+Reinhard *reinhard;
 
 void setup();
 void run();
@@ -12,17 +13,16 @@ int main() {
   finalize();
 }
 
-
 void setup() {
-  window = createWindow(800, 420, "reinhard");
+  reinhard = summonReinhardInstance();
 }
 
 void run() {
-  while(!shouldClose(window)) {
+  while(!shouldClose(reinhard->window)) {
     glfwPollEvents();
   }
 }
 
 void finalize() {
-  destroyWindow(window);
+  destroyReinhardInstance(reinhard);
 }
