@@ -7,9 +7,9 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-ubuntu:
 
-    runs-on: debian-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -19,3 +19,19 @@ jobs:
       run: make setup
     - name: make
       run: make
+#   - name: test
+#     run: make test
+
+# build-windows:
+#   runs-on: windows-latest
+#
+#   steps:
+#   - uses: actions/checkout@v3
+#   - name: install
+#     run:
+#   - name: setup
+#     run: make setup
+#   - name: make
+#     run: make
+#   - name: test
+#     run: make test
