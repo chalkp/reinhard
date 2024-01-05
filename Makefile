@@ -2,7 +2,7 @@ TARGET = build/reinhard
 SRC = $(wildcard src/*.c)
 OBJ = $(patsubst src/%.c, build/obj/%.o, $(SRC))
 
-CFLAGS = -std=c17 -O2 -g -Wall -Wextra -Wpedantic -Werror
+CFLAGS = -std=c17 -O2 -Wall -Wextra -Wpedantic -Werror
 INCLUDE = -Iinclude
 LIBS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
@@ -33,14 +33,13 @@ build/shaders/%.frag.spv: shaders/%.frag
 # chalk is a lazy wittwle guvy uwu
 
 clean:
-	rm -r build/*
-	mkdir build/obj build/shaders
+	rm $(OBJ) $(TARGET) $(SHADER_TARGET) 
 
 install:
 	wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
 	sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-1.3.268-jammy.list https://packages.lunarg.com/vulkan/1.3.268/lunarg-vulkan-1.3.268-jammy.list
 	sudo apt update
-	sudo apt install vulkan-sdk libglfw3 libglfw3-dev libxi-dev libxxf86vm-dev
+	sudo apt install gcc make libc6 libx11-dev vulkan-sdk libglfw3 libglfw3-dev libxi-dev libxxf86vm-dev
 	sudo apt upgrade
 
 setup:
