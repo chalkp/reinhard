@@ -5,7 +5,7 @@
 CharVector readFile(const char *path) {
   FILE *file = fopen(path, "rb+");
   if(file == NULL) {
-    fprintf(stderr, "failed to open file: %s\n", path);
+    fprintf(stderr, "fopen: failed to open file: %s\n", path);
     exit(1);
   }
 
@@ -13,13 +13,19 @@ CharVector readFile(const char *path) {
   long size = ftell(file);
   rewind(file);
 
+  if(size == -1) {
+    fclose(file);
+    fprintf(stderr, "fseek: failed to get file size: %s\n", path);
+    exit(1);
+  }
+
   char *buffer = (char*)calloc(size, sizeof(char));
   long readed = fread(buffer, sizeof(char), size, file);
+  fclose(file);
   if(readed != size) {
     fprintf(stderr, "failed to read file: %s\nsize readed: %ld\n", path, readed);
     exit(1);
   }
-  fclose(file);
 
   CharVector ret = { buffer, size };
   return ret;
