@@ -1,5 +1,6 @@
 #pragma once
 
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <stdbool.h>
 
@@ -13,3 +14,5 @@ typedef struct Window {
 Window *createWindow(int w, int h, const char *name);
 void destroyWindow(Window *w);
 bool shouldClose(Window *w);
+
+void createWindowSurface(Window *w, VkInstance instance, VkSurfaceKHR *surface);

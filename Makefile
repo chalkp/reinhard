@@ -33,7 +33,8 @@ build/shaders/%.frag.spv: shaders/%.frag
 # chalk is a lazy wittwle guvy uwu
 
 clean:
-	rm $(OBJ) $(TARGET) $(SHADER_TARGET) 
+	rm -rf build
+	mkdir build build/obj build/shaders
 
 install:
 	wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc

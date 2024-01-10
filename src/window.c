@@ -26,3 +26,11 @@ void destroyWindow(Window *w) {
 bool shouldClose(Window *w) {
   return glfwWindowShouldClose(w->window);
 }
+
+void createWindowSurface(Window *w, VkInstance instance, VkSurfaceKHR *surface) {
+  if(glfwCreateWindowSurface(instance, w->window, NULL, surface) != VK_SUCCESS) {
+    fprintf(stderr, "glfwCreateWindowSurface: failed to create window surface");
+    exit(1);
+  }
+}
+
