@@ -14,4 +14,5 @@ void destroyPipeline(Pipeline *gp) {
   free(gp->vert.data);
   free(gp->frag.data);
   free(gp);
+  gp = NULL;
 }

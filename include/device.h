@@ -21,4 +21,5 @@ typedef struct Device {
   VkPhysicalDeviceProperties properties;
 } Device;
 
-// TODO: implement everything under this
+Device *createDevice(Window *window);
+void destroyDevice(Device *device);

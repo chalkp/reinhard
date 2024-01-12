@@ -21,6 +21,7 @@ void destroyWindow(Window *w) {
   glfwDestroyWindow(w->window);
   glfwTerminate();
   free(w);
+  w = NULL;
 }
 
 bool shouldClose(Window *w) {

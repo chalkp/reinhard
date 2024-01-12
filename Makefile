@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 TARGET = build/reinhard
 SRC = $(wildcard src/*.c)
 OBJ = $(patsubst src/%.c, build/obj/%.o, $(SRC))

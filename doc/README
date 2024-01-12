@@ -1,0 +1,11 @@
+Current: 0.0.0-f1
+
+Reinhard Development Cycle
+
+New Features  (f)
+Bug Fixes     (b)
+Pedantic      (p)
+
+version example:
+
+0.0.0-f1 -> 0.0.0-b1 -> 0.0.0-p1 -> 0.0.0-f2 -> 0.0.0-b2 -> 0.0.0-p2 -> 0.0.1-f1 -> ...

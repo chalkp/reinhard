@@ -12,4 +12,5 @@ void destroyReinhardInstance(Reinhard *reinhard) {
   destroyWindow(reinhard->window);
   destroyPipeline(reinhard->pipeline);
   free(reinhard);
+  reinhard = NULL;
 }
