@@ -1,8 +1,38 @@
 #include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-CharVector readFile(const char *path) {
+CharVector create_char_vector() {
+  CharVector ret = {NULL, 0};
+  return ret;
+}
+
+CharVector copy_char_vector(const CharVector *cv) {
+  CharVector copy;
+  copy.size = cv->size;
+
+  copy.data = (char*)malloc(copy.size * sizeof(char));
+  if(copy.data == NULL) {
+    fprintf(stderr, "malloc: failed to allocate memory in copy_char_vector\n");
+    return (CharVector){NULL, 0}; // return error CharVector
+  }
+
+  memcpy(copy.data, cv->data, copy.size);
+
+  return copy;
+}
+
+void destroy_char_vector(CharVector *cv) {
+  if(cv->data == NULL) {
+    return;
+  }
+  free(cv->data);
+  cv->data = NULL;
+  cv->size = 0;  
+}
+
+CharVector read_file(const char *path) {
   FILE *file = fopen(path, "rb+");
   if(file == NULL) {
     fprintf(stderr, "fopen: failed to open file: %s\n", path);
@@ -10,34 +40,43 @@ CharVector readFile(const char *path) {
   }
 
   fseek(file, 0L, SEEK_END);
-  long size = ftell(file);
+  size_t size = ftell(file);
   rewind(file);
-
-  if(size == -1) {
+  if(size == (size_t)-1) {
     fclose(file);
     fprintf(stderr, "fseek: failed to get file size: %s\n", path);
     exit(1);
   }
 
-  char *buffer = (char*)calloc(size, sizeof(char));
-  long readed = fread(buffer, sizeof(char), size, file);
+  char *buffer = (char*)calloc(size + 1, sizeof(char)); // size + 1: reserve space for a potential null terminator
+  if(buffer == NULL) {
+    fclose(file);
+    fprintf(stderr, "calloc: failed to allocate buffer memory\n");
+    exit(1);
+  }
+  
+  size_t readed = fread(buffer, sizeof(char), size, file);
   fclose(file);
   if(readed != size) {
-    fprintf(stderr, "failed to read file: %s\nsize readed: %ld\n", path, readed);
-    exit(1);
+    free(buffer);
+    return (CharVector){NULL, 0};
   }
 
   CharVector ret = { buffer, size };
   return ret;
 }
 
-void writeFile(const char *path, const CharVector *cv) {
+void write_file(const char *path, const CharVector *cv) {
   FILE *file = fopen(path, "wb");
-  long written = fwrite(cv->data, sizeof(char), cv->size, file);
+  if(file == NULL) {
+    fprintf(stderr, "failed to open file: %s\n", path);
+    exit(1);
+  }
 
+  size_t written = fwrite(cv->data, sizeof(char), cv->size, file);
+  fclose(file);
   if(written != cv->size) {
     fprintf(stderr, "failed to write file: %s\nsize written: %ld\n", path, written);
     exit(1);
   }
-  fclose(file);
 }

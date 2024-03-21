@@ -4,22 +4,22 @@
 #include <stdbool.h>
 #include <vulkan/vulkan.h>
 
-typedef struct Device {
+typedef struct device {
   Window *window;
 
   VkInstance instance;
-  VkDebugUtilsMessengerEXT debugMessenger;
-  VkPhysicalDevice physicalDevice;
-  VkCommandPool commandPool;
+  VkDebugUtilsMessengerEXT debug_messenger;
+  VkPhysicalDevice physical_device;
+  VkCommandPool command_pool;
 
-  VkDevice device_;
-  VkSurfaceKHR surface_;
-  VkQueue graphicsQueue_;
-  VkQueue presentQueue_;
+  VkDevice device;
+  VkSurfaceKHR surface;
+  VkQueue graphics_queue;
+  VkQueue present_queue;
 
-  bool enableValidationLayers;
+  bool enable_validation_layers;
   VkPhysicalDeviceProperties properties;
 } Device;
 
-Device *createDevice(Window *window);
-void destroyDevice(Device *device);
+Device *create_device(Window *window);
+void destroy_device(Device *device);  // more consistent parameter naming

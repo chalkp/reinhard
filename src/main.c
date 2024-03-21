@@ -11,18 +11,23 @@ int main() {
   setup();
   run();
   finalize();
+  return 0;
 }
 
 void setup() {
-  reinhard = summonReinhardInstance();
+  reinhard = create_reinhard_instance();
+  if(reinhard == NULL) {
+    fprintf(stderr, "Failed to create Reinhard instance\n");
+    return;
+  }
 }
 
 void run() {
-  while(!shouldClose(reinhard->window)) {
+  while(!should_close(reinhard->window)) {
     glfwPollEvents();
   }
 }
 
 void finalize() {
-  destroyReinhardInstance(reinhard);
+  destroy_reinhard_instance(reinhard);
 }

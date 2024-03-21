@@ -3,16 +3,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-Pipeline *createPipeline(const char *vertFile, const char *fragFile) {
+Pipeline *create_pipeline(const char *vert_file, const char *frag_file) {
   Pipeline *pipeline = (Pipeline*)malloc(sizeof(Pipeline));
-  pipeline->vert = readFile(vertFile);
-  pipeline->frag = readFile(fragFile);
+  pipeline->vertex_shader_code = read_file(vert_file);
+  pipeline->fragment_shader_code = read_file(frag_file);
   return pipeline;
 }
 
-void destroyPipeline(Pipeline *gp) {
-  free(gp->vert.data);
-  free(gp->frag.data);
-  free(gp);
-  gp = NULL;
+void destroy_pipeline(Pipeline *pipeline) {
+  free(pipeline->vertex_shader_code.data);
+  free(pipeline->fragment_shader_code.data);
+  free(pipeline);
+  pipeline = NULL;
 }

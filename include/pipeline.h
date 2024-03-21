@@ -1,10 +1,11 @@
 #pragma once
+
 #include "utils.h"
 
-typedef struct Pipeline {
-  CharVector vert;
-  CharVector frag;
+typedef struct pipeline {
+  CharVector vertex_shader_code;
+  CharVector fragment_shader_code;
 } Pipeline;
 
-Pipeline *createPipeline(const char *vertFile, const char *fragFile);
-void destroyPipeline(Pipeline *gp);
+Pipeline *create_pipeline(const char *vert_file, const char *frag_file);
+void destroy_pipeline(Pipeline *pipeline);

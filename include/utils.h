@@ -1,9 +1,15 @@
 #pragma once
 
-typedef struct CharVector {
+#include <stddef.h>
+
+typedef struct char_vector {
   char *data;
-  long size;
+  size_t size;
 } CharVector;
 
-CharVector readFile(const char *path);
-void writeFile(const char *path, const CharVector *cv);
+CharVector create_char_vector();
+CharVector copy_char_vector(const CharVector *cv);
+void destroy_char_vector(CharVector *cv);
+
+CharVector read_file(const char *path);
+void write_file(const char *path, const CharVector *cv);

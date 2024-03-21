@@ -2,10 +2,10 @@
 #include "window.h"
 #include "pipeline.h"
 
-typedef struct Reinhard {
+typedef struct reinhard {
   Window *window;
   Pipeline *pipeline;
 } Reinhard;
 
-Reinhard *summonReinhardInstance();
-void destroyReinhardInstance(Reinhard *reinhard);
+Reinhard *create_reinhard_instance();
+void destroy_reinhard_instance(Reinhard *reinhard);

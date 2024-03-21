@@ -3,16 +3,17 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <stdbool.h>
+#include <vulkan/vulkan.h>
 
-typedef struct Window {
+typedef struct window {
   int width;
   int height;
   const char *windowName;
-  GLFWwindow *window;
+  GLFWwindow *glfw_window;
 } Window;
 
-Window *createWindow(int w, int h, const char *name);
-void destroyWindow(Window *w);
-bool shouldClose(Window *w);
+Window *create_window(int width, int height, const char *title);
+void destroy_window(Window *window);
+bool should_close(Window *window);
 
-void createWindowSurface(Window *w, VkInstance instance, VkSurfaceKHR *surface);
+void create_window_surface(Window *window, VkInstance instance, VkSurfaceKHR *surface);
