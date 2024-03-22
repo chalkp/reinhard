@@ -4,21 +4,25 @@ TARGET = build/reinhard
 SRC = $(wildcard src/*.c)
 OBJ = $(patsubst src/%.c, build/obj/%.o, $(SRC))
 
+CC = gcc
 CFLAGS = -std=c17 -O2 -Wall -Wextra -Wpedantic -Werror
 INCLUDE = -Iinclude
 LIBS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
-default: $(TARGET)
+.PHONY: default all clean install setup lazy run
+
+default: all
+
+all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	gcc -o $@ $? $(LIBS) $(CFLAGS)
+	$(CC) -o $@ $? $(LIBS) $(CFLAGS)
 
 build/obj/%.o: src/%.c
-	gcc -c -o $@ $< $(INCLUDE) $(LIBS) $(CFLAGS)
+	$(CC) -c -o $@ $< $(INCLUDE) $(LIBS) $(CFLAGS)
 
 
 # compile shaders
-
 VERTS = $(wildcard shaders/*.vert)
 FRAGS = $(wildcard shaders/*.frag)
 SHADER_TARGET = $(patsubst shaders/%.vert, build/shaders/%.vert.spv, $(VERTS)) $(patsubst shaders/%.frag, build/shaders/%.frag.spv, $(FRAGS))
@@ -48,10 +52,8 @@ install:
 setup:
 	mkdir build build/obj build/shaders
 
-lazy:
-	make clean
-	make
-	make compile_shaders
+lazy: clean all compile_shaders
 
-run:
-	$(TARGET)
+
+run: $(TARGET)
+	./$(TARGET)

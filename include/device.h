@@ -1,6 +1,7 @@
 #pragma once
 
 #include "window.h"
+#include "utils.h"
 #include <stdbool.h>
 #include <vulkan/vulkan.h>
 
@@ -19,7 +20,30 @@ typedef struct device {
 
   bool enable_validation_layers;
   VkPhysicalDeviceProperties properties;
+
+  const CharVector validation_layers;
+  const CharVector device_extensions;
 } Device;
 
 Device *create_device(Window *window);
-void destroy_device(Device *device);  // more consistent parameter naming
+void destroy_device(Device *device);
+
+
+bool create_instance(Device *device);
+bool setup_debug_messenger(Device *device);
+bool pick_physical_device(Device *device);
+bool create_logical_device(Device *device);
+bool create_surface(Device *device);
+bool create_command_pool(Device *device);
+
+void application_info_setup(VkApplicationInfo *app_info);
+void create_info_setup(Device *device,
+  VkInstanceCreateInfo *create_info,
+  VkDebugUtilsMessengerCreateInfoEXT *debug_create_info,
+  VkApplicationInfo *app_info,
+  CharVector *extensions
+);
+void debug_create_info_setup(VkDebugUtilsMessengerCreateInfoEXT *debug_create_info);
+bool check_validation_layer_support(Device *device);
+CharVector get_required_extensions(Device *device);
+bool is_device_suitable(VkPhysicalDevice device, Device* device_info);

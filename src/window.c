@@ -20,7 +20,7 @@ Window *create_window(int width, int height, const char *title) {
 
   window->width = width;
   window->height = height;
-  window->windowName = title;
+  window->title = title;
   window->glfw_window = glfwCreateWindow(width, height, title, NULL, NULL);
   
   if(window->glfw_window == NULL) {
@@ -44,7 +44,10 @@ bool should_close(Window *window) {
   return glfwWindowShouldClose(window->glfw_window);
 }
 
-void create_window_surface(Window *window, VkInstance instance, VkSurfaceKHR *surface) {
+void create_window_surface(Window *window,
+  VkInstance instance,
+  VkSurfaceKHR *surface
+) {
   VkResult result = glfwCreateWindowSurface(instance, window->glfw_window, NULL, surface);
   if(result != VK_SUCCESS) {
     fprintf(stderr, "glfwCreateWindowSurface: failed to create window surface\n");
