@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils.h"
+#include <vulkan/vulkan.h>
 
 typedef struct pipeline {
   CharVector vertex_shader_code;

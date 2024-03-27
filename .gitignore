@@ -1,2 +1,3 @@
-build/*
-test/*
+build/
+temp/
+test/

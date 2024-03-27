@@ -13,25 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: install
-      run: make install
-    - name: setup
-      run: make setup
-    - name: make
+    - name: install dependencies
+      run: make install && mkdir build
+    - name: compile glsl shader files
+      run: make compile_shaders
+    - name: generate cmake build Makefile
+      run: cd build && cmake -S .. -B . -G "Unix Makefiles"
+    - name: build
       run: make
-#   - name: test
-#     run: make test
-
-# build-windows:
-#   runs-on: windows-latest
-#
-#   steps:
-#   - uses: actions/checkout@v3
-#   - name: install
-#     run:
-#   - name: setup
-#     run: make setup
-#   - name: make
-#     run: make
-#   - name: test
-#     run: make test

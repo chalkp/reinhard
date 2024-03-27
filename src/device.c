@@ -1,6 +1,9 @@
 #include "device.h"
+#define GLFW_INCLUDE_VULKAN
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <vulkan/vulkan.h>
 
 #define P_APPLICATION_NAME "Reinhard"
 #define P_ENGINE_NAME "Reinhard"
@@ -68,7 +71,7 @@ bool create_instance(Device *device) {
   create_info_setup(device, &create_info, &debug_create_info, &app_info, &extensions);
 
   VkResult result = vkCreateInstance(&create_info, NULL, &device->instance);
-  if (result != VK_SUCCESS) {
+  if(result != VK_SUCCESS) {
     fprintf(stderr, "vkCreateInstance: failed to create instance\n");
     return false;
   }
@@ -82,6 +85,12 @@ bool setup_debug_messenger(Device *device) {
   }
   VkDebugUtilsMessengerCreateInfoEXT debug_create_info;
   debug_create_info_setup(&debug_create_info);
+
+  PFN_vkCreateDebugUtilsMessengerEXT func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(device->instance, "vkCreateDebugUtilsMessengerEXT");
+  if(func == NULL) {
+    fprintf(stderr, "Failed to load vkCreateDebugUtilsMessengerEXT\n");
+    return false;
+  }
   VkResult result = vkCreateDebugUtilsMessengerEXT(device->instance, &debug_create_info, NULL, &device->debug_messenger);  
   if(result != VK_SUCCESS) {
     fprintf(stderr, "vkCreateDebugUtilsMessengerEXT: failed to setup debug messenger\n");
@@ -100,7 +109,7 @@ bool pick_physical_device(Device *device) {
   }
 
   VkPhysicalDevice* devices = malloc(device_count * sizeof(VkPhysicalDevice));
-  if (devices == NULL) {
+  if(devices == NULL) {
     fprintf(stderr, "malloc: failed to allocate memory for devices\n");
     return false;
   }
@@ -108,8 +117,8 @@ bool pick_physical_device(Device *device) {
   vkEnumeratePhysicalDevices(device->instance, &device_count, devices);
 
   bool device_found = false;
-  for (uint32_t i = 0; i < device_count; i++) {
-    if (is_device_suitable(devices[i], device)) {
+  for(uint32_t i = 0; i < device_count; i++) {
+    if(is_device_suitable(devices[i], device)) {
       device->physical_device = devices[i];
       device_found = true;
       break;
