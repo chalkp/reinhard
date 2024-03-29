@@ -91,7 +91,7 @@ bool setup_debug_messenger(Device *device) {
     fprintf(stderr, "Failed to load vkCreateDebugUtilsMessengerEXT\n");
     return false;
   }
-  VkResult result = vkCreateDebugUtilsMessengerEXT(device->instance, &debug_create_info, NULL, &device->debug_messenger);  
+  VkResult result = func(device->instance, &debug_create_info, NULL, &device->debug_messenger);
   if(result != VK_SUCCESS) {
     fprintf(stderr, "vkCreateDebugUtilsMessengerEXT: failed to setup debug messenger\n");
     return false;
@@ -133,6 +133,35 @@ bool pick_physical_device(Device *device) {
 }
 
 bool create_logical_device(Device *device) {
+  // QueueFamilyIndices indices;
+  // if(find_queue_families(device->physical_device, device, &indices) != 0) {
+  //   fprintf(stderr, "Failed to find suitable queue families!\n");
+  //   return false;
+  // }
+  // uint32_t queue_family_indices[] = {indices.graphics_family, indices.present_family};
+  // int queue_create_info_count = 1;
+  // if(indices.graphics_family != indices.present_family) {
+  //   queue_create_info_count = 2;
+  // }
+
+  // float queue_priority = 1.0f;
+  // VkDeviceQueueCreateInfo queue_create_infos[queue_create_info_count];
+
+  // for(int i=0; i<queue_create_info_count; ++i) {
+  //   queue_create_infos[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+  //   queue_create_infos[i].queueFamilyIndex = queue_family_indices[i];
+  //   queue_create_infos[i].queueCount = 1;
+  //   queue_create_infos[i].pQueuePriorities = &queue_priority; 
+  // }
+
+  // VkPhysicalDeviceFeatures device_features;
+  // VkDeviceCreateInfo create_info;
+  
+  // create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+  // create_info.queueCreateInfoCount =  queue_create_info_count;
+  // create_info.pQueueCreateInfos = queue_create_infos;
+  // create_info.pEnabledFeatures = &device_features;
+  // create_info.enabledExtensionCount = 
   return true;
 }
 
@@ -203,4 +232,43 @@ CharVector get_required_extensions(Device *device) {
 
 bool is_device_suitable(VkPhysicalDevice device, Device* device_info) {
   return true;
+}
+
+
+int find_queue_families(VkPhysicalDevice device,
+  Device *device_info,
+  QueueFamilyIndices *out_indices
+) {
+  out_indices->graphics_family = -1;
+  out_indices->present_family = -1;
+
+  uint32_t queue_family_count = 0;
+  vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, NULL);
+  
+  VkQueueFamilyProperties *queue_families = (VkQueueFamilyProperties*)malloc(queue_family_count*sizeof(VkQueueFamilyProperties));
+  if(queue_families == NULL) {
+    return -1;
+  }
+
+  vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, queue_families);
+
+  for(uint32_t i=0; i<queue_family_count; i++) {
+    if(queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+      out_indices->graphics_family = i;
+    }
+
+    VkBool32 present_support = false;
+    vkGetPhysicalDeviceSurfaceSupportKHR(device, i, device_info->surface, &present_support);
+
+    if(present_support) {
+      out_indices->present_family = i;
+    }
+
+    if(out_indices->graphics_family >= 0 && out_indices->present_family >= 0) {
+      break;
+    }
+  }
+
+  free(queue_families);
+  return (out_indices->graphics_family >= 0 && out_indices->present_family >= 0) ? 0 : -1;
 }

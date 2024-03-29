@@ -22,5 +22,5 @@ add_executable(reinhard ${SOURCE_FILES})
 target_sources(reinhard PRIVATE src/main.c)
 
 target_link_directories(reinhard PRIVATE Vulkan::Vulkan)
-target_link_directories(reinhard PRIVATE glfw)
+target_link_directories(reinhard PRIVATE GLFW::glfw)
 target_link_libraries(reinhard glfw Vulkan::Vulkan)

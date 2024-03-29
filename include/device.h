@@ -5,6 +5,11 @@
 #include <stdbool.h>
 #include <vulkan/vulkan.h>
 
+typedef struct queue_family_indices {
+  uint32_t graphics_family;
+  uint32_t present_family;
+} QueueFamilyIndices;
+
 typedef struct device {
   Window *window;
 
@@ -47,3 +52,9 @@ void debug_create_info_setup(VkDebugUtilsMessengerCreateInfoEXT *debug_create_in
 bool check_validation_layer_support(Device *device);
 CharVector get_required_extensions(Device *device);
 bool is_device_suitable(VkPhysicalDevice device, Device* device_info);
+
+
+int find_queue_families(VkPhysicalDevice device,
+  Device *device_info,
+  QueueFamilyIndices *out_indices
+);
