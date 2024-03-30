@@ -80,3 +80,37 @@ void write_file(const char *path, const CharVector *cv) {
     exit(1);
   }
 }
+
+
+
+StringArray create_string_array() {
+  StringArray arr;
+  arr.size = 0;
+  arr.capacity = 4;
+  arr.data = (char**)malloc(arr.capacity*sizeof(char*));
+  if(arr.data == NULL) {
+    fprintf(stderr, "malloc: failed to allocate memory for string array\n");
+    exit(1);
+  }
+  return arr;
+}
+
+void push_string_array(StringArray *arr, const char *str) {
+  if(arr->size == arr->capacity) {
+    arr->capacity *= 2;
+    arr->data = (char**)realloc(arr->data, arr->capacity * sizeof(char*));
+    if(arr->data == NULL) {
+      fprintf(stderr, "realloc: failed to reallocate memory for string array\n");
+      exit(1);
+    }
+  }
+  arr->data[arr->size] = strdup(str);
+  arr->size++;
+}
+
+void destroy_string_array(StringArray *arr) {
+  for(size_t i=0; i<arr->size; i++) {
+    free((void*)arr->data[i]);
+  }
+  free(arr->data);
+}

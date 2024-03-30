@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <vulkan/vulkan.h>
 
 #define P_APPLICATION_NAME "Reinhard"
@@ -64,7 +65,7 @@ bool create_instance(Device *device) {
   VkApplicationInfo app_info;
   application_info_setup(&app_info);
 
-  CharVector extensions = get_required_extensions(device);
+  StringArray extensions = get_required_extensions(device);
 
   VkInstanceCreateInfo create_info;
   VkDebugUtilsMessengerCreateInfoEXT debug_create_info;
@@ -188,7 +189,7 @@ void create_info_setup(Device *device,
   VkInstanceCreateInfo *create_info,
   VkDebugUtilsMessengerCreateInfoEXT *debug_create_info,
   VkApplicationInfo *app_info,
-  CharVector *extensions
+  StringArray *extensions
 ) {
   create_info->sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   create_info->pApplicationInfo = app_info;
@@ -223,14 +224,73 @@ void debug_create_info_setup(VkDebugUtilsMessengerCreateInfoEXT *debug_create_in
 }
 
 bool check_validation_layer_support(Device *device) {
+  uint32_t layer_count;
+  vkEnumerateInstanceLayerProperties(&layer_count, NULL);
+
+  VkLayerProperties *available_layers = (VkLayerProperties*)malloc(layer_count*sizeof(VkLayerProperties));
+  if(available_layers == NULL) {
+    fprintf(stderr, "malloc: failed to allocate memory for vulkan layer properties\n");
+    return false;
+  }
+  vkEnumerateInstanceLayerProperties(&layer_count, available_layers);
+  
+  for(uint32_t i=0; i<device->validation_layers.size; i++) {
+    bool layer_found = false;
+
+    for(uint32_t j=0; j<layer_count; j++) {
+      if(strcmp(device->validation_layers.data[i], available_layers[j].layerName) == 0) {
+        layer_found = true;
+        break;
+      }
+    }
+
+    if(!layer_found) {
+      free(available_layers);
+      return false;
+    }
+  }
+
+  free(available_layers);
   return true;
 }
 
-CharVector get_required_extensions(Device *device) {
-  return (CharVector){NULL, 0};
+StringArray get_required_extensions(Device *device) {
+  StringArray extensions;
+  
+  uint32_t glfw_extension_count = 0;
+  const char **glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
+
+  if(glfw_extensions == NULL) {
+    fprintf(stderr, "failed to get required glfw extensions\n");
+    destroy_string_array(&extensions);
+    return extensions;
+  }
+
+  for(uint32_t i=0; i<glfw_extension_count; i++) {
+    push_string_array(&extensions, glfw_extensions[i]);
+  }
+
+  const char *other_extensions[] = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+  };
+  uint32_t other_extensions_count = sizeof(other_extensions) / sizeof(const char*);
+
+  for(uint32_t i=0; i<other_extensions_count; i++) {
+    push_string_array(&extensions, other_extensions[i]);
+  }
+  return extensions;
 }
 
 bool is_device_suitable(VkPhysicalDevice device, Device* device_info) {
+  VkPhysicalDeviceProperties device_properties;
+  vkGetPhysicalDeviceProperties(device, &device_properties);
+
+  // check discrete GPU
+  // bool is_discrete_gpu = device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+
+  // check vulkan api version 
+  // bool supports_required_api = device_properties.apiVersion >= VK_API_VERSION_1_0;
+  
   return true;
 }
 
@@ -264,11 +324,11 @@ int find_queue_families(VkPhysicalDevice device,
       out_indices->present_family = i;
     }
 
-    if(out_indices->graphics_family >= 0 && out_indices->present_family >= 0) {
+    if(out_indices->graphics_family > 0 && out_indices->present_family > 0) {
       break;
     }
   }
 
   free(queue_families);
-  return (out_indices->graphics_family >= 0 && out_indices->present_family >= 0) ? 0 : -1;
+  return (out_indices->graphics_family > 0 && out_indices->present_family > 0) ? 0 : -1;
 }

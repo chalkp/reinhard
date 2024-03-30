@@ -26,8 +26,8 @@ typedef struct device {
   bool enable_validation_layers;
   VkPhysicalDeviceProperties properties;
 
-  const CharVector validation_layers;
-  const CharVector device_extensions;
+  const StringArray validation_layers;
+  const StringArray device_extensions;
 } Device;
 
 Device *create_device(Window *window);
@@ -46,11 +46,11 @@ void create_info_setup(Device *device,
   VkInstanceCreateInfo *create_info,
   VkDebugUtilsMessengerCreateInfoEXT *debug_create_info,
   VkApplicationInfo *app_info,
-  CharVector *extensions
+  StringArray *extensions
 );
 void debug_create_info_setup(VkDebugUtilsMessengerCreateInfoEXT *debug_create_info);
 bool check_validation_layer_support(Device *device);
-CharVector get_required_extensions(Device *device);
+StringArray get_required_extensions(Device *device);
 bool is_device_suitable(VkPhysicalDevice device, Device* device_info);
 
 
