@@ -8,16 +8,19 @@ on:
 
 jobs:
   build-ubuntu:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
-    - name: install dependencies
-      run: make install && mkdir build build/shaders
-    - name: compile glsl shader files
-      run: make compile_shaders
-    - name: generate cmake build Makefile
-      run: cd build && cmake -S .. -B . -G "Unix Makefiles"
-    - name: build
-      run: make
+    - uses: actions/checkout@v4
+    - name: Install Dependencies (apt)
+      run: make install
+    - name: Build
+      run: |
+              mkdir build build/shaders
+              make compile_shaders
+              cd build && cmake -S .. -B . -G "Unix Makefiles"
+              make
+
+  # build-windows:
+  #   runs-on: windows-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
