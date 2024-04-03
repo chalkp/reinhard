@@ -6,6 +6,8 @@
 #include <string.h>
 #include <vulkan/vulkan.h>
 
+#include "window.h"
+
 #define P_APPLICATION_NAME "Reinhard"
 #define P_ENGINE_NAME "Reinhard"
 
@@ -177,10 +179,26 @@ bool create_logical_device(Device *device) {
 }
 
 bool create_surface(Device *device) {
+  create_window_surface(device->window, device->instance, &device->surface);
   return true;
 }
 
 bool create_command_pool(Device *device) {
+  QueueFamilyIndices indices = {0};
+  if(!find_queue_families(device->physical_device, device, &indices)) {
+    fprintf(stderr, "failed to find queue families\n");
+    return false;
+  }
+  VkCommandPoolCreateInfo pool_create_info;
+  pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+  pool_create_info.queueFamilyIndex = indices.graphics_family;
+  pool_create_info.flags = 0;
+
+  VkResult result = vkCreateCommandPool(device->device, &pool_create_info, NULL, &device->command_pool);
+  if(result != VK_SUCCESS) {
+    fprintf(stderr, "failed to create command pool\n");
+    return false;
+  }
   return true;
 }
 
