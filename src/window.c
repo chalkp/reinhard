@@ -54,4 +54,3 @@ void create_window_surface(Window *window,
     exit(1);
   }
 }
-

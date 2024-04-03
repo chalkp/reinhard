@@ -134,35 +134,45 @@ bool pick_physical_device(Device *device) {
 }
 
 bool create_logical_device(Device *device) {
-  // QueueFamilyIndices indices;
-  // if(find_queue_families(device->physical_device, device, &indices) != 0) {
-  //   fprintf(stderr, "Failed to find suitable queue families!\n");
-  //   return false;
-  // }
-  // uint32_t queue_family_indices[] = {indices.graphics_family, indices.present_family};
-  // int queue_create_info_count = 1;
-  // if(indices.graphics_family != indices.present_family) {
-  //   queue_create_info_count = 2;
-  // }
+  QueueFamilyIndices indices;
+  if(find_queue_families(device->physical_device, device, &indices) != 0) {
+    fprintf(stderr, "failed to find suitable queue families\n");
+    return false;
+  }
 
-  // float queue_priority = 1.0f;
-  // VkDeviceQueueCreateInfo queue_create_infos[queue_create_info_count];
+  uint32_t queue_family_indices[] = {indices.graphics_family, indices.present_family};
+  int queue_create_info_count = 1;
+  if(indices.graphics_family != indices.present_family) {
+    queue_create_info_count = 2;
+  }
 
-  // for(int i=0; i<queue_create_info_count; ++i) {
-  //   queue_create_infos[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-  //   queue_create_infos[i].queueFamilyIndex = queue_family_indices[i];
-  //   queue_create_infos[i].queueCount = 1;
-  //   queue_create_infos[i].pQueuePriorities = &queue_priority; 
-  // }
+  float queue_priority = 1.0f;
+  VkDeviceQueueCreateInfo queue_create_infos[queue_create_info_count];
 
-  // VkPhysicalDeviceFeatures device_features;
-  // VkDeviceCreateInfo create_info;
+  for(int i=0; i<queue_create_info_count; ++i) {
+    queue_create_infos[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queue_create_infos[i].queueFamilyIndex = queue_family_indices[i];
+    queue_create_infos[i].queueCount = 1;
+    queue_create_infos[i].pQueuePriorities = &queue_priority; 
+  }
+
+  VkPhysicalDeviceFeatures device_features;
+  VkDeviceCreateInfo create_info;
   
-  // create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-  // create_info.queueCreateInfoCount =  queue_create_info_count;
-  // create_info.pQueueCreateInfos = queue_create_infos;
-  // create_info.pEnabledFeatures = &device_features;
-  // create_info.enabledExtensionCount = 
+  create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+  create_info.queueCreateInfoCount =  queue_create_info_count;
+  create_info.pQueueCreateInfos = queue_create_infos;
+  create_info.pEnabledFeatures = &device_features;
+  
+  VkResult result = vkCreateDevice(device->physical_device, &create_info, NULL, &device->device);
+  if(result != VK_SUCCESS) {
+    fprintf(stderr, "failed to create logical device\n");
+    return false;
+  }
+
+  vkGetDeviceQueue(device->device, indices.graphics_family, 0, &device->graphics_queue);
+  vkGetDeviceQueue(device->device, indices.present_family, 0, &device->present_queue);
+  
   return true;
 }
 
@@ -286,16 +296,20 @@ bool is_device_suitable(VkPhysicalDevice device, Device* device_info) {
   vkGetPhysicalDeviceProperties(device, &device_properties);
 
   // check discrete GPU
-  // bool is_discrete_gpu = device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
-
-  // check vulkan api version 
-  // bool supports_required_api = device_properties.apiVersion >= VK_API_VERSION_1_0;
+  bool is_discrete_gpu = device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+  // check vulkan api version
+  bool supports_required_api = device_properties.apiVersion >= VK_API_VERSION_1_0;
+  // check queue families
+  QueueFamilyIndices indices = {0};
+  bool supports_required_queues = find_queue_families(device, device_info, &indices);
+  // check required extensions
+  bool extensions_supported = check_device_extension_support(device, device_info->device_extensions, device_info->device_extensions.size);
   
-  return true;
+  return is_discrete_gpu && supports_required_api && supports_required_queues && extensions_supported;
 }
 
 
-int find_queue_families(VkPhysicalDevice device,
+bool find_queue_families(VkPhysicalDevice device,
   Device *device_info,
   QueueFamilyIndices *out_indices
 ) {
@@ -307,7 +321,7 @@ int find_queue_families(VkPhysicalDevice device,
   
   VkQueueFamilyProperties *queue_families = (VkQueueFamilyProperties*)malloc(queue_family_count*sizeof(VkQueueFamilyProperties));
   if(queue_families == NULL) {
-    return -1;
+    return false;
   }
 
   vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, queue_families);
@@ -330,5 +344,41 @@ int find_queue_families(VkPhysicalDevice device,
   }
 
   free(queue_families);
-  return (out_indices->graphics_family > 0 && out_indices->present_family > 0) ? 0 : -1;
+  return (out_indices->graphics_family > 0 && out_indices->present_family > 0) ? true : false;
+}
+
+bool check_device_extension_support(VkPhysicalDevice device,
+  StringArray required_extensions,
+  uint32_t required_extensions_count
+) {
+  uint32_t extension_count = 0;
+  vkEnumerateDeviceExtensionProperties(device, NULL, &extension_count, NULL);
+
+  VkExtensionProperties* available_extensions = (VkExtensionProperties*)malloc(extension_count * sizeof(VkExtensionProperties));
+  if(available_extensions == NULL) {
+    fprintf(stderr, "malloc: failed to allocate memory for VkExtensionProperties\n");
+    return false;
+  }
+
+  vkEnumerateDeviceExtensionProperties(device, NULL, &extension_count, available_extensions);
+
+  for(uint32_t i=0; i<required_extensions_count; i++) {
+    bool extension_found = false;
+
+    for(uint32_t j = 0; j < extension_count; j++) {
+      if(strcmp(required_extensions.data[i], available_extensions[j].extensionName) == 0) {
+        extension_found = true;
+        break;
+      }
+    }
+
+    if(!extension_found) {
+      fprintf(stderr, "check_device_extension_support: extension not found\n");
+      free(available_extensions);
+      return false;
+    }
+  }
+
+  free(available_extensions);
+  return true;
 }

@@ -54,7 +54,11 @@ StringArray get_required_extensions(Device *device);
 bool is_device_suitable(VkPhysicalDevice device, Device* device_info);
 
 
-int find_queue_families(VkPhysicalDevice device,
+bool find_queue_families(VkPhysicalDevice device,
   Device *device_info,
   QueueFamilyIndices *out_indices
+);
+bool check_device_extension_support(VkPhysicalDevice device,
+  StringArray required_extensions,
+  uint32_t required_extensions_count
 );
