@@ -32,6 +32,9 @@ Device *create_device(Window *window) {
 
   device->window = window;
 
+  device->validation_layers = create_string_array();
+  device->device_extensions = create_string_array();
+
   if(!create_instance(device)) { return NULL; }
   if(device->enable_validation_layers && !setup_debug_messenger(device)) { return NULL; }
   if(!pick_physical_device(device)) { return NULL; }
@@ -47,11 +50,21 @@ void destroy_device(Device *device) {
     return;
   }
 
-  // TODO:
-  // 1. Destroy Command Pool
-  // 2. Destroy Surface
-  // 3. Destroy Logical Device
-  // 4. Destroy Instance
+  vkDestroyCommandPool(device->device, device->command_pool, NULL); 
+  vkDestroySurfaceKHR(device->instance, device->surface, NULL);
+  vkDestroyDevice(device->device, NULL);
+
+  if(device->enable_validation_layers) {
+    PFN_vkDestroyDebugUtilsMessengerEXT func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(device->instance, "vkDestroyDebugUtilsMessengerEXT");
+    if(func != NULL) {
+      func(device->instance, device->debug_messenger, NULL);
+    }
+  }
+
+  vkDestroyInstance(device->instance, NULL);
+
+  destroy_string_array(&device->validation_layers);
+  destroy_string_array(&device->device_extensions);
 
   free(device);
 }

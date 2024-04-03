@@ -26,8 +26,8 @@ typedef struct device {
   bool enable_validation_layers;
   VkPhysicalDeviceProperties properties;
 
-  const StringArray validation_layers;
-  const StringArray device_extensions;
+  StringArray validation_layers;
+  StringArray device_extensions;
 } Device;
 
 Device *create_device(Window *window);
