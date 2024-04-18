@@ -9,7 +9,7 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_BUILD_TYPE DEBUG)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -ggdb")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -ggdb")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -ggdb -Wall -Wextra -Wpedantic -Werror")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
 
 find_package(Vulkan REQUIRED)
@@ -17,7 +17,6 @@ find_package(glfw3 REQUIRED)
 
 file(GLOB SOURCE_FILES "src/*.c")
 include_directories(include)
-include_directories(include/utils)
 add_executable(reinhard ${SOURCE_FILES})
 
 target_sources(reinhard PRIVATE src/main.c)

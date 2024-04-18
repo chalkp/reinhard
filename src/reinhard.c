@@ -1,13 +1,11 @@
 #include "reinhard.h"
-
 #include <stdio.h>
 #include <stdlib.h>
-#include "utils.h"
 
 Reinhard *create_reinhard_instance() {
   Reinhard *reinhard = (Reinhard*)malloc(sizeof(Reinhard));
   if(reinhard == NULL) {
-    print_error("malloc: failed to allocate memory for Reinhard\n");
+    fprintf(stderr, "malloc: failed to allocate memory for Reinhard\n");
     return NULL;
   }
   

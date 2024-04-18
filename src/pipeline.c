@@ -1,5 +1,4 @@
 #include "pipeline.h"
-
 #include "utils.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,8 +7,11 @@ Pipeline *create_pipeline(// Device *device,
   const char *vertex_file,
   const char *fragment_file
 ) {
-  Pipeline *pipeline;
-  pointer_memory_allocate(pipeline, Pipeline, 1, "Graphic Pipeline");
+  Pipeline *pipeline = (Pipeline*)malloc(sizeof(Pipeline));
+  if(pipeline == NULL) {
+    fprintf(stderr, "malloc: failed to allocate memory for Pipeline\n");
+    return NULL;
+  }
 
   pipeline->vertex_shader_code = read_file(vertex_file);
   if(pipeline->vertex_shader_code.data == NULL) {
@@ -71,7 +73,7 @@ bool create_shader_module(Pipeline *pipeline,
   VkResult result = vkCreateShaderModule(pipeline->device->device, &create_info, NULL, shader_module);
 
   if(result != VK_SUCCESS) {
-    print_error("failed to create shader module\n");
+    fprintf(stderr, "failed to create shader module\n");
     return false;
   }
   return true;
