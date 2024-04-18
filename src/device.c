@@ -7,9 +7,14 @@
 #include <vulkan/vulkan.h>
 
 #include "window.h"
+#include "utils.h"
 
 #define P_APPLICATION_NAME "Reinhard"
 #define P_ENGINE_NAME "Reinhard"
+#define DESTROY_DEVICE \
+  destroy_string_array(&device->validation_layers); \
+  destroy_string_array(&device->device_extensions); \
+  free(device);
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -19,36 +24,30 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
   const VkDebugUtilsMessengerCallbackDataEXT *p_callback_data,
   void *p_user_data
 ) {
-  fprintf(stderr, "validation layer: %s\n", p_callback_data->pMessage);
+  print_error("validation layer: %s\n", p_callback_data->pMessage);
   return VK_FALSE;
 }
 
 Device *create_device(Window *window) {
-  Device *device = (Device*)malloc(sizeof(Device));
-  if(device == NULL) {
-    fprintf(stderr, "malloc: failed to allocate memory for Graphic Device\n");
-    return NULL;
-  }
+  Device *device;
+  pointer_memory_allocate(device, Device, 1, "Graphic Device");
 
   device->window = window;
-
   device->validation_layers = create_string_array();
   device->device_extensions = create_string_array();
 
-  if(!create_instance(device)) { return NULL; }
-  if(device->enable_validation_layers && !setup_debug_messenger(device)) { return NULL; }
-  if(!pick_physical_device(device)) { return NULL; }
-  if(!create_logical_device(device)) { return NULL; }
-  if(!create_surface(device)) { return NULL; }
-  if(!create_command_pool(device)) { return NULL; }
+  if(!create_instance(device)) { DESTROY_DEVICE; return NULL; }
+  if(device->enable_validation_layers && !setup_debug_messenger(device)) { DESTROY_DEVICE; return NULL; }
+  if(!pick_physical_device(device)) { DESTROY_DEVICE; return NULL; }
+  if(!create_logical_device(device)) { DESTROY_DEVICE;  return NULL; }
+  if(!create_surface(device)) { DESTROY_DEVICE; return NULL; }
+  if(!create_command_pool(device)) { DESTROY_DEVICE; return NULL; }
 
   return device;
 }
 
 void destroy_device(Device *device) {
-  if(device == NULL) {
-    return;
-  }
+  if(device == NULL) { return; }
 
   vkDestroyCommandPool(device->device, device->command_pool, NULL); 
   vkDestroySurfaceKHR(device->instance, device->surface, NULL);
@@ -62,18 +61,14 @@ void destroy_device(Device *device) {
   }
 
   vkDestroyInstance(device->instance, NULL);
-
-  destroy_string_array(&device->validation_layers);
-  destroy_string_array(&device->device_extensions);
-
-  free(device);
+  DESTROY_DEVICE;
 }
 
 
 
 bool create_instance(Device *device) {
   if(device->enable_validation_layers && !check_validation_layer_support(device)) {
-    fprintf(stderr, "validation layers not available\n");
+    print_error("validation layers not available\n");
     return false;
   }
 
@@ -88,7 +83,7 @@ bool create_instance(Device *device) {
 
   VkResult result = vkCreateInstance(&create_info, NULL, &device->instance);
   if(result != VK_SUCCESS) {
-    fprintf(stderr, "vkCreateInstance: failed to create instance\n");
+    print_error("vkCreateInstance: failed to create instance\n");
     return false;
   }
 
@@ -104,12 +99,12 @@ bool setup_debug_messenger(Device *device) {
 
   PFN_vkCreateDebugUtilsMessengerEXT func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(device->instance, "vkCreateDebugUtilsMessengerEXT");
   if(func == NULL) {
-    fprintf(stderr, "Failed to load vkCreateDebugUtilsMessengerEXT\n");
+    print_error("Failed to load vkCreateDebugUtilsMessengerEXT\n");
     return false;
   }
   VkResult result = func(device->instance, &debug_create_info, NULL, &device->debug_messenger);
   if(result != VK_SUCCESS) {
-    fprintf(stderr, "vkCreateDebugUtilsMessengerEXT: failed to setup debug messenger\n");
+    print_error("vkCreateDebugUtilsMessengerEXT: failed to setup debug messenger\n");
     return false;
   }
   return true;
@@ -120,13 +115,13 @@ bool pick_physical_device(Device *device) {
   vkEnumeratePhysicalDevices(device->instance, &device_count, NULL);
 
   if(device_count == 0) {
-    fprintf(stderr, "failed to find GPUs with Vulkan support\n");
+    print_error("failed to find GPUs with Vulkan support\n");
     return false;
   }
 
   VkPhysicalDevice* devices = malloc(device_count * sizeof(VkPhysicalDevice));
   if(devices == NULL) {
-    fprintf(stderr, "malloc: failed to allocate memory for devices\n");
+    print_error("malloc: failed to allocate memory for devices\n");
     return false;
   }
   
@@ -143,7 +138,7 @@ bool pick_physical_device(Device *device) {
   free(devices);
 
   if(!device_found) {
-    fprintf(stderr, "failed to find working GPU\n");
+    print_error("failed to find working GPU\n");
   }
   return device_found;
 }
@@ -151,7 +146,7 @@ bool pick_physical_device(Device *device) {
 bool create_logical_device(Device *device) {
   QueueFamilyIndices indices;
   if(find_queue_families(device->physical_device, device, &indices) != 0) {
-    fprintf(stderr, "failed to find suitable queue families\n");
+    print_error("failed to find suitable queue families\n");
     return false;
   }
 
@@ -181,7 +176,7 @@ bool create_logical_device(Device *device) {
   
   VkResult result = vkCreateDevice(device->physical_device, &create_info, NULL, &device->device);
   if(result != VK_SUCCESS) {
-    fprintf(stderr, "failed to create logical device\n");
+    print_error("failed to create logical device\n");
     return false;
   }
 
@@ -199,7 +194,7 @@ bool create_surface(Device *device) {
 bool create_command_pool(Device *device) {
   QueueFamilyIndices indices = {0};
   if(!find_queue_families(device->physical_device, device, &indices)) {
-    fprintf(stderr, "failed to find queue families\n");
+    print_error("failed to find queue families\n");
     return false;
   }
   VkCommandPoolCreateInfo pool_create_info;
@@ -209,7 +204,7 @@ bool create_command_pool(Device *device) {
 
   VkResult result = vkCreateCommandPool(device->device, &pool_create_info, NULL, &device->command_pool);
   if(result != VK_SUCCESS) {
-    fprintf(stderr, "failed to create command pool\n");
+    print_error("failed to create command pool\n");
     return false;
   }
   return true;
@@ -268,11 +263,9 @@ bool check_validation_layer_support(Device *device) {
   uint32_t layer_count;
   vkEnumerateInstanceLayerProperties(&layer_count, NULL);
 
-  VkLayerProperties *available_layers = (VkLayerProperties*)malloc(layer_count*sizeof(VkLayerProperties));
-  if(available_layers == NULL) {
-    fprintf(stderr, "malloc: failed to allocate memory for vulkan layer properties\n");
-    return false;
-  }
+  VkLayerProperties *available_layers;
+  pointer_memory_allocate(available_layers, VkLayerProperties, layer_count, "vulkan layer properties");
+
   vkEnumerateInstanceLayerProperties(&layer_count, available_layers);
   
   for(uint32_t i=0; i<device->validation_layers.size; i++) {
@@ -302,7 +295,7 @@ StringArray get_required_extensions(Device *device) {
   const char **glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
 
   if(glfw_extensions == NULL) {
-    fprintf(stderr, "failed to get required glfw extensions\n");
+    print_error("failed to get required glfw extensions\n");
     destroy_string_array(&extensions);
     return extensions;
   }
@@ -385,11 +378,8 @@ bool check_device_extension_support(VkPhysicalDevice device,
   uint32_t extension_count = 0;
   vkEnumerateDeviceExtensionProperties(device, NULL, &extension_count, NULL);
 
-  VkExtensionProperties* available_extensions = (VkExtensionProperties*)malloc(extension_count * sizeof(VkExtensionProperties));
-  if(available_extensions == NULL) {
-    fprintf(stderr, "malloc: failed to allocate memory for VkExtensionProperties\n");
-    return false;
-  }
+  VkExtensionProperties* available_extensions;
+  pointer_memory_allocate(available_extensions, VkExtensionProperties, extension_count, "extension list");
 
   vkEnumerateDeviceExtensionProperties(device, NULL, &extension_count, available_extensions);
 
@@ -404,7 +394,7 @@ bool check_device_extension_support(VkPhysicalDevice device,
     }
 
     if(!extension_found) {
-      fprintf(stderr, "check_device_extension_support: extension not found\n");
+      print_error("check_device_extension_support: extension not found\n");
       free(available_extensions);
       return false;
     }

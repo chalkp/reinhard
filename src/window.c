@@ -1,6 +1,7 @@
 #include "window.h"
 #include <stdio.h> 
 #include <stdlib.h>
+#include "utils.h"
 
 Window *create_window(int width, int height, const char *title) {
   if(!glfwInit()) {
@@ -8,15 +9,11 @@ Window *create_window(int width, int height, const char *title) {
     return NULL;
   }
 
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // No Open-GL API context
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); // Not yet.
   
-  Window *window = (Window*)malloc(sizeof(Window));
-
-  if (window == NULL) {
-    fprintf(stderr, "malloc: failed to allocate memory\n");
-    return NULL;
-  }
+  Window *window;
+  pointer_memory_allocate(window, Window, 1, "Window");
 
   window->width = width;
   window->height = height;
@@ -38,10 +35,6 @@ void destroy_window(Window *window) {
     free(window);
   }
   glfwTerminate();
-}
-
-bool should_close(Window *window) {
-  return glfwWindowShouldClose(window->glfw_window);
 }
 
 void create_window_surface(Window *window,

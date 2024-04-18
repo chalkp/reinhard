@@ -29,6 +29,9 @@ void setup_shader_stages(Pipeline *pipeline,
 );
 
 
+typedef struct pipeline_config_info {
+} Pipeline_Config_Info;
+
 // > OK future chalk, listen.
 // > This is where present chalk dont know anymore what should chalk do next.
 // > When past chalk wrote this, only god and him knows how does these even compile.
